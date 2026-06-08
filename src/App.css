@@ -100,3 +100,23 @@ td {
   border: 2px solid #2563eb;
   transform: scale(1.02);
 }
+.planning-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.planning-card h2 {
+  margin-bottom: 15px;
+}
+
+.planning-card div {
+  margin-bottom: 10px;
+}
+
+.planning-card input {
+  margin-left: 10px;
+  width: 120px;
+  padding: 5px;
+}

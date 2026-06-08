@@ -44,6 +44,9 @@ const biggestShortage = partsData.reduce((maxPart, part) => {
 function App() {
 const [searchTerm, setSearchTerm] = useState("");
 const [filterType, setFilterType] = useState("all");
+const [m1201084, setM1201084] = useState(0);
+const [m115SL15F56, setM115SL15F56] = useState(0);
+const [n212N133423, setN212N133423] = useState(0);
 const filteredParts = partsData
   .filter((part) =>
     part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,7 +67,7 @@ const filteredParts = partsData
     (a, b) =>
       Math.max(b.minimumStock - b.onHand, 0) -
       Math.max(a.minimumStock - a.onHand, 0)
-  );
+  ); 
   return (
     <div className="dashboard">
       <header className="hero-section">
@@ -75,6 +78,43 @@ const filteredParts = partsData
           before they delay customer orders.
         </p>
       </header>
+      <section className="planning-card">
+  <h2>Production Planning</h2>
+
+  <div>
+    <label>212N133-423:</label>
+    <input
+      type="number"
+      value={n212N133423}
+      onChange={(e) => setN212N133423(Number(e.target.value))}
+    />
+  </div>
+
+  <div>
+    <label>M115SL15F56:</label>
+    <input
+      type="number"
+      value={m115SL15F56}
+      onChange={(e) => setM115SL15F56(Number(e.target.value))}
+    />
+  </div>
+
+  <div>
+    <label>M120-1084:</label>
+    <input
+      type="number"
+      value={m1201084}
+      onChange={(e) => setM1201084(Number(e.target.value))}
+    />
+  </div>
+  <button
+  onClick={() => {
+    alert("Generate Requirements Clicked");
+  }}
+>
+  Generate Requirements
+</button>
+</section> 
 
       <section className="value-cards">
    <div
