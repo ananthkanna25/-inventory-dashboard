@@ -116,24 +116,28 @@ const filteredParts = partsData
     description: "Spring Assembly",
     qtyPerUnit: 1,
     requiredQty: m1201084,
+    onHand: 80,
   },
   {
     partNumber: "PART-002",
     description: "Handle Assembly",
     qtyPerUnit: 1,
     requiredQty: m1201084,
+    onHand: 150
   },
   {
     partNumber: "PART-003",
     description: "Switch Assembly",
     qtyPerUnit: 2,
     requiredQty: m1201084 * 2,
+    onHand: 50
   },
   {
     partNumber: "PART-004",
     description: "Housing Assembly",
     qtyPerUnit: 1,
     requiredQty: m1201084,
+    onHand: 200
   },
 ]);
   }}
@@ -147,6 +151,8 @@ const filteredParts = partsData
       <th>Part Number</th>
       <th>Description</th>
       <th>Required Qty</th>
+      <th>On Hand</th>
+      <th>Shortage</th>
     </tr>
   </thead>
   <tbody>
@@ -154,7 +160,12 @@ const filteredParts = partsData
       <tr key={part.partNumber}>
         <td>{part.partNumber}</td>
         <td>{part.description}</td>
+        
         <td>{part.requiredQty}</td>
+        <td>{part.onHand}</td>
+        <td>
+        {Math.max(part.requiredQty - part.onHand, 0)}
+        </td>
       </tr>
     ))}
   </tbody>
