@@ -110,24 +110,55 @@ const filteredParts = partsData
   </div>
   <button
   onClick={() => {
-    setBomParts([
-      {
-        partNumber: "PART-001",
-        description: "Spring Assembly",
-        qtyPerUnit: 1,
-        requiredQty: m1201084,
-      },
-    ]);
+   setBomParts([
+  {
+    partNumber: "PART-001",
+    description: "Spring Assembly",
+    qtyPerUnit: 1,
+    requiredQty: m1201084,
+  },
+  {
+    partNumber: "PART-002",
+    description: "Handle Assembly",
+    qtyPerUnit: 1,
+    requiredQty: m1201084,
+  },
+  {
+    partNumber: "PART-003",
+    description: "Switch Assembly",
+    qtyPerUnit: 2,
+    requiredQty: m1201084 * 2,
+  },
+  {
+    partNumber: "PART-004",
+    description: "Housing Assembly",
+    qtyPerUnit: 1,
+    requiredQty: m1201084,
+  },
+]);
   }}
 >
   Generate Requirements
 </button>
 <p>Parts Loaded: {bomParts.length}</p>
-{bomParts.map((part) => (
-  <p key={part.partNumber}>
-    {part.partNumber} - {part.description} - Required: {part.requiredQty}
-  </p>
-))}
+<table>
+  <thead>
+    <tr>
+      <th>Part Number</th>
+      <th>Description</th>
+      <th>Required Qty</th>
+    </tr>
+  </thead>
+  <tbody>
+    {bomParts.map((part) => (
+      <tr key={part.partNumber}>
+        <td>{part.partNumber}</td>
+        <td>{part.description}</td>
+        <td>{part.requiredQty}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 </section> 
 
       <section className="value-cards">
