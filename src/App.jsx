@@ -47,6 +47,7 @@ const [filterType, setFilterType] = useState("all");
 const [m1201084, setM1201084] = useState(0);
 const [m115SL15F56, setM115SL15F56] = useState(0);
 const [n212N133423, setN212N133423] = useState(0);
+const [bomParts, setBomParts] = useState([]);
 const filteredParts = partsData
   .filter((part) =>
     part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,11 +110,24 @@ const filteredParts = partsData
   </div>
   <button
   onClick={() => {
-    alert("Generate Requirements Clicked");
+    setBomParts([
+      {
+        partNumber: "PART-001",
+        description: "Spring Assembly",
+        qtyPerUnit: 1,
+        requiredQty: m1201084,
+      },
+    ]);
   }}
 >
   Generate Requirements
 </button>
+<p>Parts Loaded: {bomParts.length}</p>
+{bomParts.map((part) => (
+  <p key={part.partNumber}>
+    {part.partNumber} - {part.description} - Required: {part.requiredQty}
+  </p>
+))}
 </section> 
 
       <section className="value-cards">
