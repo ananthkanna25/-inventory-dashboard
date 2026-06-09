@@ -1,4 +1,8 @@
 import { useState } from "react";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import './App.css'
 const partsData = [
   {
@@ -48,6 +52,20 @@ const [m1201084, setM1201084] = useState(0);
 const [m115SL15F56, setM115SL15F56] = useState(0);
 const [n212N133423, setN212N133423] = useState(0);
 const [bomParts, setBomParts] = useState([]);
+const bomSources = {
+  "M120-1084": "/sample-boms/M120-1084_BOM (1).pdf",
+};
+const readBomPdf = async () => {
+  const loadingTask = pdfjsLib.getDocument(bomSources["M120-1084"]);
+  const pdf = await loadingTask.promise;
+  const page = await pdf.getPage(1);
+  const textContent = await page.getTextContent();
+
+  const text = textContent.items.map((item) => item.str).join(" ");
+
+  console.log(text);
+  alert("PDF text read. Check Console.");
+};
 const filteredParts = partsData
   .filter((part) =>
     part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
