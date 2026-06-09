@@ -153,6 +153,7 @@ const filteredParts = partsData
       <th>Required Qty</th>
       <th>On Hand</th>
       <th>Shortage</th>
+      <th>Status</th>
     </tr>
   </thead>
   <tbody>
@@ -160,12 +161,21 @@ const filteredParts = partsData
       <tr key={part.partNumber}>
         <td>{part.partNumber}</td>
         <td>{part.description}</td>
-        
         <td>{part.requiredQty}</td>
-        <td>{part.onHand}</td>
+        <td>{part.onHand}</td> 
         <td>
         {Math.max(part.requiredQty - part.onHand, 0)}
         </td>
+       <td>
+        <span
+           style={{
+          color: part.requiredQty > part.onHand ? "red" : "green",
+          fontWeight: "bold",
+        }}
+      >
+           {part.requiredQty > part.onHand ? "🔴 SHORT" : "🟢 OK"}
+        </span>
+     </td>
       </tr>
     ))}
   </tbody>
