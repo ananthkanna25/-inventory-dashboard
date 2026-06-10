@@ -62,13 +62,27 @@ const readBomPdf = async () => {
   url: bomSources["M120-1084"],
 });
   const pdf = await loadingTask.promise;
-  const page = await pdf.getPage(1);
+  let fullText = "";
+
+for (let i = 1; i <= pdf.numPages; i++) {
+  const page = await pdf.getPage(i);
   const textContent = await page.getTextContent();
 
-  const text = textContent.items.map((item) => item.str).join(" ");
+  fullText +=
+    textContent.items.map((item) => item.str).join(" ") + "\n";
+}
 
-  console.log(text);
-  alert("PDF text read. Check Console.");
+console.log(fullText);
+alert("All pages read");
+  const partMatches = fullText.match(/[A-Z]-\d{5}/g) || [];
+
+const uniqueParts = [...new Set(partMatches)];
+
+console.log("Extracted Parts:", uniqueParts);
+
+alert(`Extracted ${uniqueParts.length} part numbers`);
+  console.log(fullText);
+  alert("all pages read");
 };
 const filteredParts = partsData
   .filter((part) =>
