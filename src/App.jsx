@@ -74,22 +74,7 @@ for (let i = 1; i <= pdf.numPages; i++) {
 
 console.log(fullText);
 alert("All pages read");
-  const partMatches = fullText.match(/[A-Z]-\d{5}/g) || [];
-
-const uniqueParts = [...new Set(partMatches)];
-const extractedBomParts = uniqueParts.map((partNumber) => ({
-  partNumber: partNumber,
-  description: "From BOM PDF",
-  qtyPerUnit: 1,
-  requiredQty: m1201084,
-  onHand: 0,
-}));
-
-setBomParts(extractedBomParts);
-
-console.log("Extracted Parts:", uniqueParts);
-
-alert(`Extracted ${uniqueParts.length} part numbers`);
+  
   console.log(fullText);
   alert("all pages read");
 };
