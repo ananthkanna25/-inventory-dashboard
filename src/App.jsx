@@ -84,6 +84,13 @@ const loadingTask = pdfjsLib.getDocument({
   }
 
   console.log(fullText);
+  const targetPart = "B-12248";
+const targetIndex = fullText.indexOf(targetPart);
+
+console.log(
+  "TEXT AROUND TARGET:",
+  fullText.substring(targetIndex - 150, targetIndex + 300)
+);
 
   const partMatches = fullText.match(/[A-Z]-\d{5}/g) || [];
   const uniqueParts = [...new Set(partMatches)];
@@ -91,13 +98,21 @@ const loadingTask = pdfjsLib.getDocument({
   console.log("Extracted Parts:", uniqueParts);
   alert(`Found ${uniqueParts.length} unique parts`);
 
-  const extractedBomParts = uniqueParts.map((partNumber) => ({
+  const extractedBomParts = uniqueParts.map((partNumber) => {
+  const index = fullText.indexOf(partNumber);
+  const nearbyText = fullText.substring(index, index + 120);
+
+  const qtyMatch = nearbyText.match(/\d+\s+(\d+\.\d{4})/);
+  const qtyPerUnit = qtyMatch ? Number(qtyMatch[1]) : 1;
+
+  return {
     partNumber,
     description: "Description pending",
-    qtyPerUnit: 1,
-    requiredQty: m1201084,
+    qtyPerUnit,
+    requiredQty: m1201084 * qtyPerUnit,
     onHand: 0,
-  }));
+  };
+});
 
   setBomParts(extractedBomParts);
 };
