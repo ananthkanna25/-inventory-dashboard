@@ -53,14 +53,25 @@ const [m115SL15F56, setM115SL15F56] = useState(0);
 const [n212N133423, setN212N133423] = useState(0);
 const [bomParts, setBomParts] = useState([]);
 const bomSources = {
+  "212N133-423": "/sample-boms/212N133-423_BOM.pdf",
+  "M115SL15F56": "/sample-boms/M115SL15F56_BOM.pdf",
   "M120-1084": "/sample-boms/M120-1084_BOM (1).pdf",
 };
 const readBomPdf = async () => {
   alert("PDF text read successfully");
 
-  const loadingTask = pdfjsLib.getDocument({
-    url: "/sample-boms/M115SL15F56_BOM.pdf",
-  });
+  const selectedBom =
+  m1201084 > 0
+    ? bomSources["M120-1084"]
+    : m115SL15F56 > 0
+    ? bomSources["M115SL15F56"]
+    : n212N133423 > 0
+    ? bomSources["212N133-423"]
+    : bomSources["M120-1084"];
+
+const loadingTask = pdfjsLib.getDocument({
+  url: selectedBom,
+});
 
   const pdf = await loadingTask.promise;
   let fullText = "";
