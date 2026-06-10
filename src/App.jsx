@@ -56,27 +56,39 @@ const bomSources = {
   "M120-1084": "/sample-boms/M120-1084_BOM (1).pdf",
 };
 const readBomPdf = async () => {
- alert("PDF text read successfully");
-  console.log("BOM SOURCE:", bomSources["M120-1084"]);
+  alert("PDF text read successfully");
+
   const loadingTask = pdfjsLib.getDocument({
-  url: bomSources["M120-1084"],
-});
+    url: "/sample-boms/M115SL15F56_BOM.pdf",
+  });
+
   const pdf = await loadingTask.promise;
   let fullText = "";
 
-for (let i = 1; i <= pdf.numPages; i++) {
-  const page = await pdf.getPage(i);
-  const textContent = await page.getTextContent();
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
 
-  fullText +=
-    textContent.items.map((item) => item.str).join(" ") + "\n";
-}
+    fullText += textContent.items.map((item) => item.str).join(" ") + "\n";
+  }
 
-console.log(fullText);
-alert("All pages read");
-  
   console.log(fullText);
-  alert("all pages read");
+
+  const partMatches = fullText.match(/[A-Z]-\d{5}/g) || [];
+  const uniqueParts = [...new Set(partMatches)];
+
+  console.log("Extracted Parts:", uniqueParts);
+  alert(`Found ${uniqueParts.length} unique parts`);
+
+  const extractedBomParts = uniqueParts.map((partNumber) => ({
+    partNumber,
+    description: "Description pending",
+    qtyPerUnit: 1,
+    requiredQty: m1201084,
+    onHand: 0,
+  }));
+
+  setBomParts(extractedBomParts);
 };
 const filteredParts = partsData
   .filter((part) =>
