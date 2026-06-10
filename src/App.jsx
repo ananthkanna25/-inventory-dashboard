@@ -56,7 +56,11 @@ const bomSources = {
   "M120-1084": "/sample-boms/M120-1084_BOM (1).pdf",
 };
 const readBomPdf = async () => {
-  const loadingTask = pdfjsLib.getDocument(bomSources["M120-1084"]);
+ alert("PDF text read successfully");
+  console.log("BOM SOURCE:", bomSources["M120-1084"]);
+  const loadingTask = pdfjsLib.getDocument({
+  url: bomSources["M120-1084"],
+});
   const pdf = await loadingTask.promise;
   const page = await pdf.getPage(1);
   const textContent = await page.getTextContent();
@@ -126,40 +130,7 @@ const filteredParts = partsData
       onChange={(e) => setM1201084(Number(e.target.value))}
     />
   </div>
-  <button
-  onClick={() => {
-   setBomParts([
-  {
-    partNumber: "PART-001",
-    description: "Spring Assembly",
-    qtyPerUnit: 1,
-    requiredQty: m1201084,
-    onHand: 80,
-  },
-  {
-    partNumber: "PART-002",
-    description: "Handle Assembly",
-    qtyPerUnit: 1,
-    requiredQty: m1201084,
-    onHand: 150
-  },
-  {
-    partNumber: "PART-003",
-    description: "Switch Assembly",
-    qtyPerUnit: 2,
-    requiredQty: m1201084 * 2,
-    onHand: 50
-  },
-  {
-    partNumber: "PART-004",
-    description: "Housing Assembly",
-    qtyPerUnit: 1,
-    requiredQty: m1201084,
-    onHand: 200
-  },
-]);
-  }}
->
+  <button onClick={readBomPdf}>
   Generate Requirements
 </button>
 <p>Parts Loaded: {bomParts.length}</p>
