@@ -98,26 +98,48 @@ console.log(
   console.log("Extracted Parts:", uniqueParts);
   alert(`Found ${uniqueParts.length} unique parts`);
 
+  const bomLines = fullText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter(
+      (line) =>
+        !/(Component Item Number|Description\s*\/\s*Comment|Qty Needed|Units|Bill of Material|Page|Date)/i.test(
+          line
+        )
+    );
+
   const extractedBomParts = uniqueParts.map((partNumber) => {
-  const index = fullText.indexOf(partNumber);
-  const nearbyText = fullText.substring(index, index + 120);
+    const partLine =
+      bomLines.find((line) => line.includes(partNumber)) ||
+      fullText.substring(fullText.indexOf(partNumber), fullText.indexOf(partNumber) + 120);
 
-  const qtyMatch = nearbyText.match(/\d+\s+(\d+\.\d{4})/);
-  const qtyPerUnit = qtyMatch ? Number(qtyMatch[1]) : 1;
+    const qtyMatch = partLine.match(/\b\d+\s+(\d+\.\d{4})\b/);
+    const qtyPerUnit = qtyMatch ? Number(qtyMatch[1]) : 1;
 
-  return {
-    partNumber,
-    description: nearbyText
-  .replace(partNumber, "")
-  .replace(qtyPerUnit.toFixed(4), "")
-  .replace(/\d+\s+/, "")
-  .split(" EA ")[0]
-  .trim(),
-    qtyPerUnit,
-    requiredQty: m1201084 * qtyPerUnit,
-    onHand: 0,
-  };
-});
+    const description = partLine
+      .replace(partNumber, "")
+      .replace(qtyMatch ? qtyMatch[0] : "", "")
+      .replace(/\b(EA|PC|PCS|Each)\b.*$/i, "")
+      .replace(
+        /(Component Item Number|Description\s*\/\s*Comment|Qty Needed|Units|Bill of Material|Page|Date)/gi,
+        ""
+      )
+      .replace(/\s{2,}/g, " ")
+      .replace(/^\d+\s*/, "")
+      .trim();
+
+    return {
+      partNumber,
+      description,
+      qtyPerUnit,
+      requiredQty: m1201084 * qtyPerUnit,
+      onHand: 0,
+    };
+  }).filter((part) =>
+  !part.description.toLowerCase().includes("component item number") &&
+  !part.description.toLowerCase().includes("subassembly")
+);
 
   setBomParts(extractedBomParts);
 };
