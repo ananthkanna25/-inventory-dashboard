@@ -107,7 +107,12 @@ console.log(
 
   return {
     partNumber,
-    description: "Description pending",
+    description: nearbyText
+  .replace(partNumber, "")
+  .replace(qtyPerUnit.toFixed(4), "")
+  .replace(/\d+\s+/, "")
+  .split(" EA ")[0]
+  .trim(),
     qtyPerUnit,
     requiredQty: m1201084 * qtyPerUnit,
     onHand: 0,
