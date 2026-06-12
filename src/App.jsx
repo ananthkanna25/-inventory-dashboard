@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { bomSources } from "./data/bomSources.js";
+import { getPartMatches, getUniqueParts, sortParts } from "./utils/bomParser.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import './App.css'
@@ -94,8 +95,8 @@ console.log(
   fullText.substring(targetIndex - 150, targetIndex + 300)
 );
 
-  const partMatches = fullText.match(/[A-Z]-\d{5}/g) || [];
-  const uniqueParts = [...new Set(partMatches)];
+  const partMatches = getPartMatches(fullText);
+  const uniqueParts = getUniqueParts(partMatches);
 
   console.log("Extracted Parts:", uniqueParts);
   alert(`Found ${uniqueParts.length} unique parts`);
@@ -142,10 +143,9 @@ console.log(
   !part.description.toLowerCase().includes("component item number") &&
   !part.description.toLowerCase().includes("subassembly")
 );
-  extractedBomParts.sort((a, b) =>
-  a.partNumber.localeCompare(b.partNumber)
-);
-  setBomParts(extractedBomParts);
+ const sortedBomParts = sortParts(extractedBomParts);
+
+  setBomParts(sortedBomParts);
 };
 const filteredParts = partsData
   .filter((part) =>
