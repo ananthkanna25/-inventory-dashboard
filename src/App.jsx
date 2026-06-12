@@ -2,7 +2,7 @@ import { useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { bomSources } from "./data/bomSources.js";
-import { getPartMatches, getUniqueParts, sortParts } from "./utils/bomParser.js";
+import { parseBomParts, sortParts } from "./utils/bomParser.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import './App.css'
@@ -87,63 +87,15 @@ const loadingTask = pdfjsLib.getDocument({
   }
 
   console.log(fullText);
-  const targetPart = "B-12248";
-const targetIndex = fullText.indexOf(targetPart);
+  const extractedBomParts = parseBomParts(fullText, orderQty);
 
-console.log(
-  "TEXT AROUND TARGET:",
-  fullText.substring(targetIndex - 150, targetIndex + 300)
-);
+  console.log(
+    "Extracted Parts:",
+    extractedBomParts.map((item) => item.partNumber)
+  );
+  alert(`Found ${extractedBomParts.length} unique parts`);
 
-  const partMatches = getPartMatches(fullText);
-  const uniqueParts = getUniqueParts(partMatches);
-
-  console.log("Extracted Parts:", uniqueParts);
-  alert(`Found ${uniqueParts.length} unique parts`);
-
-  const bomLines = fullText
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter(
-      (line) =>
-        !/(Component Item Number|Description\s*\/\s*Comment|Qty Needed|Units|Bill of Material|Page|Date)/i.test(
-          line
-        )
-    );
-
-  const extractedBomParts = uniqueParts.map((partNumber) => {
-    const partLine =
-      bomLines.find((line) => line.includes(partNumber)) ||
-      fullText.substring(fullText.indexOf(partNumber), fullText.indexOf(partNumber) + 120);
-
-    const qtyMatch = partLine.match(/\b\d+\s+(\d+\.\d{4})\b/);
-    const qtyPerUnit = qtyMatch ? Number(qtyMatch[1]) : 1;
-
-    const description = partLine
-      .replace(partNumber, "")
-      .replace(qtyMatch ? qtyMatch[0] : "", "")
-      .replace(/\b(EA|PC|PCS|Each)\b.*$/i, "")
-      .replace(
-        /(Component Item Number|Description\s*\/\s*Comment|Qty Needed|Units|Bill of Material|Page|Date)/gi,
-        ""
-      )
-      .replace(/\s{2,}/g, " ")
-      .replace(/^\d+\s*/, "")
-      .trim();
-
-    return {
-      partNumber,
-      description,
-      qtyPerUnit,
-     requiredQty: orderQty * qtyPerUnit,
-      onHand: 0,
-    };
-  }).filter((part) =>
-  !part.description.toLowerCase().includes("component item number") &&
-  !part.description.toLowerCase().includes("subassembly")
-);
- const sortedBomParts = sortParts(extractedBomParts);
+  const sortedBomParts = sortParts(extractedBomParts);
 
   setBomParts(sortedBomParts);
 };
