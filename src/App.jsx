@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
+import { bomSources } from "./data/bomSources.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import './App.css'
@@ -48,10 +49,13 @@ const biggestShortage = partsData.reduce((maxPart, part) => {
 function App() {
 const [searchTerm, setSearchTerm] = useState("");
 const [filterType, setFilterType] = useState("all");
+const [modelNumber, setModelNumber] = useState("");
+const [orderQty, setOrderQty] = useState(0);
 const [m1201084, setM1201084] = useState(0);
 const [m115SL15F56, setM115SL15F56] = useState(0);
 const [n212N133423, setN212N133423] = useState(0);
 const [bomParts, setBomParts] = useState([]);
+const [prefixFilter, setPrefixFilter] = useState("all");
 const bomSources = {
   "212N133-423": "/sample-boms/212N133-423_BOM.pdf",
   "M115SL15F56": "/sample-boms/M115SL15F56_BOM.pdf",
@@ -60,14 +64,12 @@ const bomSources = {
 const readBomPdf = async () => {
   alert("PDF text read successfully");
 
-  const selectedBom =
-  m1201084 > 0
-    ? bomSources["M120-1084"]
-    : m115SL15F56 > 0
-    ? bomSources["M115SL15F56"]
-    : n212N133423 > 0
-    ? bomSources["212N133-423"]
-    : bomSources["M120-1084"];
+const selectedBom = bomSources[modelNumber];
+
+if (!selectedBom) {
+  alert("Model not found");
+  return;
+}
 
 const loadingTask = pdfjsLib.getDocument({
   url: selectedBom,
@@ -133,14 +135,16 @@ console.log(
       partNumber,
       description,
       qtyPerUnit,
-      requiredQty: m1201084 * qtyPerUnit,
+     requiredQty: orderQty * qtyPerUnit,
       onHand: 0,
     };
   }).filter((part) =>
   !part.description.toLowerCase().includes("component item number") &&
   !part.description.toLowerCase().includes("subassembly")
 );
-
+  extractedBomParts.sort((a, b) =>
+  a.partNumber.localeCompare(b.partNumber)
+);
   setBomParts(extractedBomParts);
 };
 const filteredParts = partsData
@@ -164,6 +168,10 @@ const filteredParts = partsData
       Math.max(b.minimumStock - b.onHand, 0) -
       Math.max(a.minimumStock - a.onHand, 0)
   ); 
+  const aCount = bomParts.filter((p) => p.partNumber.startsWith("A-")).length;
+const bCount = bomParts.filter((p) => p.partNumber.startsWith("B-")).length;
+const cCount = bomParts.filter((p) => p.partNumber.startsWith("C-")).length;
+const dCount = bomParts.filter((p) => p.partNumber.startsWith("D-")).length;
   return (
     <div className="dashboard">
       <header className="hero-section">
@@ -176,36 +184,34 @@ const filteredParts = partsData
       </header>
       <section className="planning-card">
   <h2>Production Planning</h2>
-
   <div>
-    <label>212N133-423:</label>
-    <input
-      type="number"
-      value={n212N133423}
-      onChange={(e) => setN212N133423(Number(e.target.value))}
-    />
+  <label>Model Number:</label>
+  <input
+    type="text"
+    value={modelNumber}
+    onChange={(e) => setModelNumber(e.target.value)}
+  />
   </div>
 
   <div>
-    <label>M115SL15F56:</label>
-    <input
-      type="number"
-      value={m115SL15F56}
-      onChange={(e) => setM115SL15F56(Number(e.target.value))}
-    />
+  <label>Order Quantity:</label>
+  <input
+    type="number"
+    value={orderQty}
+    onChange={(e) => setOrderQty(Number(e.target.value))}
+  />
   </div>
 
-  <div>
-    <label>M120-1084:</label>
-    <input
-      type="number"
-      value={m1201084}
-      onChange={(e) => setM1201084(Number(e.target.value))}
-    />
-  </div>
   <button onClick={readBomPdf}>
   Generate Requirements
 </button>
+<div>
+  <button onClick={() => setPrefixFilter("all")}>All ({bomParts.length})</button>
+<button onClick={() => setPrefixFilter("A-")}>A ({aCount})</button>
+<button onClick={() => setPrefixFilter("B-")}>B ({bCount})</button>
+<button onClick={() => setPrefixFilter("C-")}>C ({cCount})</button>
+<button onClick={() => setPrefixFilter("D-")}>D ({dCount})</button>
+</div>
 <p>Parts Loaded: {bomParts.length}</p>
 <table>
   <thead>
@@ -219,7 +225,13 @@ const filteredParts = partsData
     </tr>
   </thead>
   <tbody>
-    {bomParts.map((part) => (
+    {bomParts
+  .filter(
+    (part) =>
+      prefixFilter === "all" ||
+      part.partNumber.startsWith(prefixFilter)
+  )
+  .map((part) => (
       <tr key={part.partNumber}>
         <td>{part.partNumber}</td>
         <td>{part.description}</td>
