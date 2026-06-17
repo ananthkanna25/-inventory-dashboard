@@ -2,31 +2,10 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { parseBomParts } from "../src/utils/bomParser.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pdfPath = path.join(__dirname, "../public/sample-boms/M120-1084_BOM (1).pdf");
-
-const partNumberPattern = /\b(?:[A-Z]-\d{5}(?:[-/][A-Z0-9]+)*|[A-Z0-9]{6,}(?:[-/][A-Z0-9]+)*)\b/g;
-
-const lowPriorityTerms = [
-  "wire",
-  "wires",
-  "washer",
-  "nut",
-  "screw",
-  "loctite",
-  "grease",
-  "label",
-  "decal",
-  "procedure",
-  "terminal",
-];
-
-const isLowPriority = (text) => {
-  const lower = text.toLowerCase();
-  return lowPriorityTerms.some((term) => lower.includes(term));
-};
-
 
 async function parseBomPdf() {
   console.log(`Reading PDF: ${pdfPath}\n`);
@@ -41,56 +20,18 @@ async function parseBomPdf() {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
 
-    // Extract full text from PDF
-    let fullText = textContent.items.map((item) => item.str).join(" ");
-
-    // Normalize whitespace (preserve word boundaries, no splitting into lines)
-    const normalized = fullText
-      .replace(/\s+/g, " ")
-      .trim();
-
-    // Regex pattern: partNumber level qty description unit
-    const partPattern = `(?:${partNumberPattern.source})`;
-    const bomRowRegex = new RegExp(
-      `\\b(${partPattern})\\s+(\\d+)\\s+(\\d+\\.\\d{4})\\s+(.+?)\\s+(EA|A\\/R|FT)\\b`,
-      "gi"
-    );
-
-    const rows = [];
-    for (const match of normalized.matchAll(bomRowRegex)) {
-      const partNumber = match[1].trim();
-      const level = Number(match[2]);
-      const qtyPerUnit = Number(match[3]);
-      let description = match[4].trim();
-      const unit = match[5].toUpperCase();
-
-      if (!partNumber || !description) continue;
-      if (isLowPriority(description)) continue;
-
-      description = description.replace(/\s*\|\s*/g, " ").replace(/\s{2,}/g, " ").trim();
-
-      if (!description || /^(?:Page|Date|Qty Needed|Units|Component Item Number|Description)/i.test(description)) {
-        continue;
-      }
-
-      rows.push({
-        partNumber,
-        level,
-        qtyPerUnit,
-        description,
-        unit,
-      });
-    }
+    const fullText = textContent.items.map((item) => item.str).join(" ");
+    const rows = parseBomParts(fullText, 0, true);
 
     console.log("BOM Rows from fullText parsing:\n");
-    console.log("PartNumber          | Lvl | Qty    | Description                              | Unit");
-    console.log("-".repeat(95));
+    console.log("PartNumber          | Qty    | Description                              | Unit | Category");
+    console.log("-".repeat(105));
     for (const row of rows) {
-      const desc = (row.description || "").substring(0, 38).padEnd(38);
-      console.log(`${row.partNumber.padEnd(19)} | ${String(row.level).padEnd(3)} | ${String(row.qtyPerUnit).padEnd(6)} | ${desc} | ${row.unit}`);
+      const desc = (row.description || "").substring(0, 32).padEnd(32);
+      console.log(`${row.partNumber.padEnd(19)} | ${String(row.qtyPerUnit).padEnd(6)} | ${desc} | ${row.unit.padEnd(2)} | ${row.category}`);
     }
 
-    console.log(`\nTotal rows: ${rows.length}`);
+    console.log(`\nTotal rows parsed: ${rows.length}`);
   }
 }
 
