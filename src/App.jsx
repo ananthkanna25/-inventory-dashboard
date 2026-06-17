@@ -4,6 +4,7 @@ import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 import { bomSources } from "./data/bomSources.js";
 import { parseBomParts, sortParts } from "./utils/bomParser.js";
 import { criticalParts } from "./data/criticalParts.js";
+import { orders } from "./data/orders.js";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import './App.css'
@@ -15,6 +16,11 @@ function App() {
   const [prefixFilter, setPrefixFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [searchTerm, setSearchTerm] = useState("");
+  const handleMonthlyRequirements = () => {
+  orders.forEach((order) => {
+    console.log("Order:", order.model, order.quantity);
+  });
+};
 
   const readBomPdf = async () => {
     alert("PDF text read successfully");
@@ -122,44 +128,62 @@ function App() {
           <button onClick={() => setCategoryFilter("Consumable")}>Consumable</button>
           <button onClick={() => setCategoryFilter("Other")}>Other</button>
         </div>
-        
-        <p>
-          Showing: {prefixFilter === "all" ? "All Prefixes" : prefixFilter}
-          {" | "}
-            Category: {categoryFilter}
-          </p>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-  <input
-    type="text"
-    placeholder="Search part number or description..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-  />
 
-  <button
-    onClick={() => {
-      setPrefixFilter("all");
-      setCategoryFilter("All Categories");
-      setSearchTerm("");
-    }}
-  >
-    Clear
-  </button>
-</div>
-         <p>
-  Showing { 
-    bomParts.filter(
-      (part) =>
-        (prefixFilter === "all" || part.partNumber.startsWith(prefixFilter)) &&
-        (categoryFilter === "All Categories" || part.category === categoryFilter) &&
-        (
-          part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          part.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    ).length
-  } of {bomParts.length} parts
-  <h3>Required Parts Report</h3>
-</p>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+          <input
+            type="text"
+            placeholder="Search part number or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <button
+            onClick={() => {
+              setPrefixFilter("all");
+              setCategoryFilter("All Categories");
+              setSearchTerm("");
+            }}
+          >
+            Clear
+          </button>
+        </div>
+
+        <h3>Future Orders</h3>
+       
+
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr key={order.model}>
+                <td>{order.model}</td>
+                <td>{order.quantity}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+ <button onClick={handleMonthlyRequirements}>
+  Generate Monthly Requirements
+</button>
+        <p>
+          Showing {bomParts.filter(
+            (part) =>
+              (prefixFilter === "all" || part.partNumber.startsWith(prefixFilter)) &&
+              (categoryFilter === "All Categories" || part.category === categoryFilter) &&
+              (
+                part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                part.description.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+          ).length} of {bomParts.length} parts
+        </p>
+
+        <h3>Required Parts Report</h3>
+
         <table>
           <thead>
             <tr>
@@ -175,14 +199,14 @@ function App() {
           <tbody>
             {bomParts
               .filter(
-  (part) =>
-    (prefixFilter === "all" || part.partNumber.startsWith(prefixFilter)) &&
-    (categoryFilter === "All Categories" || part.category === categoryFilter) &&
-    (
-      part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      part.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-)
+                (part) =>
+                  (prefixFilter === "all" || part.partNumber.startsWith(prefixFilter)) &&
+                  (categoryFilter === "All Categories" || part.category === categoryFilter) &&
+                  (
+                    part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    part.description.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+              )
               .map((part) => (
                 <tr key={part.partNumber}>
                   <td>{part.partNumber}</td>
@@ -191,7 +215,7 @@ function App() {
                   <td>{part.requiredQty}</td>
                   <td>{part.unit}</td>
                   <td>{part.category}</td>
-                  <td> {criticalParts[part.partNumber] || "-"}</td>
+                  <td>{criticalParts[part.partNumber] || "-"}</td>
                 </tr>
               ))}
           </tbody>
